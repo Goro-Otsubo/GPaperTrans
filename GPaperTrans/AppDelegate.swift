@@ -11,18 +11,14 @@ import UIKit
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
-    var window:COSTouchVisualizerWindow?
-    //var window: UIWindow?
-    //lazy var window: COSTouchVisualizerWindow? = {
-    //    COSTouchVisualizerWindow(frame: UIScreen.mainScreen().bounds)
-    //    }()
+    var window:UIWindow?
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
         
         // Create first choice view and set as rootViewController
         
         var choiceViewController = GChoiceViewController(nibName: nil, bundle: nil)
-        self.window = COSTouchVisualizerWindow(frame: UIScreen.mainScreen().bounds)
+        self.window = UIWindow(frame: UIScreen.mainScreen().bounds)
         
         self.window!.rootViewController = choiceViewController
         self.window!.makeKeyAndVisible()

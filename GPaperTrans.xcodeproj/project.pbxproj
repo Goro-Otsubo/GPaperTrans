@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		230AEBE51A808BD5001F5350 /* GCollectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 230AEBE41A808BD5001F5350 /* GCollectionView.swift */; };
+		239E3B721A6F653800C26486 /* GTransLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 239E3B711A6F653800C26486 /* GTransLayout.swift */; };
 		23ADD6671A27FCA700F7823D /* GChoiceViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23ADD6661A27FCA700F7823D /* GChoiceViewController.swift */; };
 		23ADD6691A280E2700F7823D /* GSyncViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23ADD6681A280E2700F7823D /* GSyncViewCell.swift */; };
 		5A438424EC16CB2906C66D4B /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3A248CB0BCCCA61FADE8DD94 /* libPods.a */; };
@@ -29,6 +31,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		230AEBE41A808BD5001F5350 /* GCollectionView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GCollectionView.swift; sourceTree = "<group>"; };
+		239E3B711A6F653800C26486 /* GTransLayout.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GTransLayout.swift; sourceTree = "<group>"; };
 		23ADD6661A27FCA700F7823D /* GChoiceViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GChoiceViewController.swift; sourceTree = "<group>"; };
 		23ADD6681A280E2700F7823D /* GSyncViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GSyncViewCell.swift; sourceTree = "<group>"; };
 		3A248CB0BCCCA61FADE8DD94 /* libPods.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPods.a; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -122,6 +126,8 @@
 				23ADD6681A280E2700F7823D /* GSyncViewCell.swift */,
 				C9E8455D1A15ADB90040F1B3 /* GCollectionViewCell.swift */,
 				C9E845651A15B2110040F1B3 /* GCollectionViewController.swift */,
+				239E3B711A6F653800C26486 /* GTransLayout.swift */,
+				230AEBE41A808BD5001F5350 /* GCollectionView.swift */,
 			);
 			path = "GCollectionView Base";
 			sourceTree = "<group>";
@@ -274,6 +280,8 @@
 				23ADD6671A27FCA700F7823D /* GChoiceViewController.swift in Sources */,
 				23ADD6691A280E2700F7823D /* GSyncViewCell.swift in Sources */,
 				C9E845661A15B2110040F1B3 /* GCollectionViewController.swift in Sources */,
+				239E3B721A6F653800C26486 /* GTransLayout.swift in Sources */,
+				230AEBE51A808BD5001F5350 /* GCollectionView.swift in Sources */,
 				C9E8455B1A15AC210040F1B3 /* GRootViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -400,6 +408,7 @@
 				PROVISIONING_PROFILE = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "GPaperTrans/GPaperTrans-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -416,6 +425,7 @@
 				PRODUCT_NAME = GPaperTrans;
 				PROVISIONING_PROFILE = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "GPaperTrans/GPaperTrans-Bridging-Header.h";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};

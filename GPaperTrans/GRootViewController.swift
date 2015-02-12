@@ -13,14 +13,13 @@ import UIKit
 
 class GRootViewController: UIViewController {
 
-    var imageNode:ASImageNode?                      // image view for top half
+    let imageNode:ASImageNode = ASImageNode()                      // image view for top half
     var colViewCtrl:GCollectionViewController? // collectionViewController for bottom half view
     
     var asyncFlag:Bool = true
 
     
     required  override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: NSBundle?) {
-        self.imageNode = nil
         self.colViewCtrl = nil
         super.init(nibName:nibNameOrNil, bundle:nibBundleOrNil)
     }
@@ -38,11 +37,11 @@ class GRootViewController: UIViewController {
         let cellSizeRatio:CGFloat = 0.5
         let cellHeight = viewHeight * cellSizeRatio     //height of cell
         
-        self.imageNode = ASImageNode()                  // image node for top half
-        imageNode!.frame = CGRectMake(0,0,viewWidth,viewHeight-cellHeight)
-        imageNode?.backgroundColor = UIColor.darkGrayColor()
+                 // image node for top half
+        imageNode.frame = CGRectMake(0,0,viewWidth,viewHeight-cellHeight)
+        imageNode.backgroundColor = UIColor.darkGrayColor()
         self.fetchImage(viewWidth, y:viewHeight-cellHeight)
-        self.view.addSubview(imageNode!.view)
+        self.view.addSubview(imageNode.view)
         
         let backLabel = UILabel(frame: CGRectMake(0,0,150,40))
         backLabel.textColor = UIColor.whiteColor()
@@ -56,7 +55,7 @@ class GRootViewController: UIViewController {
         
         let gradLayer = CAGradientLayer()
         
-        gradLayer.frame = imageNode!.frame;
+        gradLayer.frame = imageNode.frame;
         gradLayer.colors = [
             UIColor(white:0.0 , alpha: 0.4).CGColor,
             UIColor(white:0.0 , alpha: 0.0).CGColor,
@@ -69,7 +68,7 @@ class GRootViewController: UIViewController {
         gradLayer.endPoint = CGPointMake(0.5,1.0);
         gradLayer.locations = [0.0,0.2,0.93,0.98,1.0]
         
-        imageNode!.layer.addSublayer(gradLayer)
+        imageNode.layer.addSublayer(gradLayer)
         
         
         let shortLayout = UICollectionViewFlowLayout()
@@ -86,7 +85,7 @@ class GRootViewController: UIViewController {
         tallLayout.itemSize = CGSizeMake(viewWidth,viewHeight)
         tallLayout.sectionInset = UIEdgeInsetsMake(0, 0, 0, 0)
         tallLayout.minimumInteritemSpacing = 0
-        tallLayout.minimumLineSpacing = 3
+        tallLayout.minimumLineSpacing = 0
 
         self.colViewCtrl = GCollectionViewController(collectionViewLayout: shortLayout)
         
@@ -96,8 +95,6 @@ class GRootViewController: UIViewController {
         colViewCtrl!.tallLayout = tallLayout
         colViewCtrl!.shortLayout = shortLayout
         self.view.addSubview(colViewCtrl!.view)
-
-
 
     }
 
@@ -123,15 +120,15 @@ class GRootViewController: UIViewController {
                 if let wSelf = self {
                     // do what you want with the image/self
                     if let imageData = image {
-                        if(wSelf.imageNode!.nodeLoaded){
+                        if(wSelf.imageNode.nodeLoaded){
                             
                             dispatch_sync(dispatch_get_main_queue()) {
                                 // once the node's view is loaded, the node should only be used on the main thread
-                                wSelf.imageNode!.image = image
+                                wSelf.imageNode.image = imageData
                             }
                         }
                         else{
-                            wSelf.imageNode!.image = image
+                            wSelf.imageNode.image = imageData
                         }
                     }
                 }

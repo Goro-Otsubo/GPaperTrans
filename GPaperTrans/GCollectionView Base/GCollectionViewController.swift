@@ -15,15 +15,21 @@ let synReuseIdentifier = "SyncGCell"    //identifier for cell with UIImageView
 //also serves as view controller for magnified view
 
 class GCollectionViewController: UICollectionViewController,UIGestureRecognizerDelegate {
-    var asyncNodeFlag:Bool          //if true, use GCollectioniViewCell and pop
-    var initialPanPoint:CGPoint     // record the point where pan began
+    var asyncNodeFlag:Bool                      //if true, use GCollectioniViewCell and pop
+    var initialPanPoint:CGPoint                 // record the point where pan began
     var shortLayout:UICollectionViewFlowLayout  //layout for short height collectionViewCell
     var tallLayout:UICollectionViewFlowLayout   //layout for tall height collectionViewCell
-    var toBeExpandedFlag:Bool       //true if transition from short to tall. false if otherwise
-    var targetY:CGFloat             //if the touch point moved to this y values, progress should be 1.0
+    var toBeExpandedFlag:Bool                   //true if transition from short to tall. false if otherwise
+    var targetY:CGFloat                         //if the touch point moved to this y values, progress should be 1.0
     var panRecog:UIPanGestureRecognizer?
-    var transitioningFlag = false   //true from collectioView.startInt.. to finishUpInteraction
-    var changedFlag = false         //true if UIGestureRecognizerState.Changed  after interaction began
+    var transitioningFlag = false               //true from collectioView.startInt.. to finishUpInteraction
+    var changedFlag = false                     //true if UIGestureRecognizerState.Changed  after interaction began
+    var initxOffset:CGFloat                     //xoffset for UICollectionView when transition began
+    var xOffset:CGFloat                         //xoffset for UICollectioinView while changing
+    var touchedCell:UICollectionViewCell?       //the cell which user touched at first
+    var initXCell:CGFloat                       //frame.origin.x of cell when user touched
+    var tgtXCell:CGFloat                        //frame.origin.x of cell when transaction will finish
+    var xWhenReleased:CGFloat                   //x of touch point when user released the finger
     
     override init(collectionViewLayout layout: UICollectionViewLayout!) {
         
@@ -35,9 +41,22 @@ class GCollectionViewController: UICollectionViewController,UIGestureRecognizerD
         self.shortLayout = UICollectionViewFlowLayout()
         self.tallLayout = UICollectionViewFlowLayout()
         self.panRecog = nil
+        
+        self.initxOffset = 0
+        self.initXCell = 0
+        self.tgtXCell = 0
+        self.xOffset = 0
+        self.touchedCell = nil
+        self.xWhenReleased = 0
 
         super.init(collectionViewLayout: layout)
         
+        self.collectionView?.removeFromSuperview()
+        
+        self.collectionView = GCollectionView(frame: CGRectZero, collectionViewLayout: layout)
+        self.collectionView?.dataSource = self
+        self.view.addSubview(self.collectionView!)
+
         // Register cell classes
         self.collectionView?.registerClass(GCollectionViewCell.self, forCellWithReuseIdentifier: reuseIdentifier)
         self.collectionView?.registerClass(GSyncViewCell.self, forCellWithReuseIdentifier: synReuseIdentifier)
@@ -56,8 +75,7 @@ class GCollectionViewController: UICollectionViewController,UIGestureRecognizerD
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.collectionView?.backgroundColor = UIColor.clearColor()
-
+        self.collectionView?.frame = self.view.bounds
     }
 
     override func didReceiveMemoryWarning() {
@@ -98,8 +116,7 @@ class GCollectionViewController: UICollectionViewController,UIGestureRecognizerD
         transitionLayoutForOldLayout fromLayout: UICollectionViewLayout,
         newLayout toLayout: UICollectionViewLayout) -> UICollectionViewTransitionLayout
     {
-        let ret = UICollectionViewTransitionLayout(currentLayout:fromLayout, nextLayout: toLayout)
-
+        let ret = GTransLayout(currentLayout:fromLayout, nextLayout: toLayout)
         return ret
         
     }
@@ -150,15 +167,31 @@ class GCollectionViewController: UICollectionViewController,UIGestureRecognizerD
     
     func handlePan(sender:UIPanGestureRecognizer){
         
-        let point = sender.locationInView(sender.view)
+        var point = sender.locationInView(sender.view?.superview)
         let velocity = sender.velocityInView(sender.view)
         
         //limit the range of velocity so that animation will not stop when verlocity is 0
         
         let yVelocity = CGFloat(max(min(abs(velocity.y),80.0),20.0))
         
-        let progress = max(min(abs(point.y - initialPanPoint.y)/abs(targetY - initialPanPoint.y),1.0),0.0)
-        
+        var progress = max(min(abs(point.y - initialPanPoint.y)/abs(targetY - initialPanPoint.y),1.0),0.0)
+        if toBeExpandedFlag{
+            if point.y > initialPanPoint.y {
+                progress = 0.0
+            }
+            else if point.y < targetY {
+                progress = 1.0
+            }
+        }
+        else{
+            if point.y < initialPanPoint.y {
+                progress = 0.0
+            }
+            else if point.y > targetY {
+                progress = 1.0
+            }
+        }
+
         switch sender.state{
             
         case UIGestureRecognizerState.Began:
@@ -188,15 +221,67 @@ class GCollectionViewController: UICollectionViewController,UIGestureRecognizerD
             // update targetY value
             
             self.targetY = tallHeight - hRatio * (self.toBeExpandedFlag ? tallHeight : shortHeight)
+            
+            self.initxOffset = self.collectionView!.contentOffset.x
 
+            //self.tLayout =
             self.collectionView?.startInteractiveTransitionToCollectionViewLayout(
                     toBeExpandedFlag ? tallLayout : shortLayout,
                     completion: { completed, finished in
                         if !self.asyncNodeFlag {
-                            self.postInteractionFinished()
+                            self.startGesture()
                         }
-                })
+                        println("completion block called")
+                        (self.collectionView! as GCollectionView).offsetAccept = true
+
+                        
+                        if finished {
+                            self.collectionView?.contentOffset = CGPointMake(self.xOffset,0)
+                            if !self.toBeExpandedFlag {
+                                self.collectionView!.pagingEnabled = true
+                                let SpringAnimation = POPSpringAnimation()
+                                
+                                //animate scrolling to proper cell position
+                                SpringAnimation.property = POPAnimatableProperty.propertyWithName(kPOPScrollViewContentOffset) as POPAnimatableProperty
+                                
+                                SpringAnimation.toValue = NSValue(CGPoint:CGPointMake(self.tgtXCell,0))
+                                SpringAnimation.springBounciness=5;
+                                SpringAnimation.springSpeed=4;
+                                SpringAnimation.delegate=self
+                                
+                                self.collectionView!.pop_addAnimation(SpringAnimation, forKey: "contentOffset")
+                            }
+                            else{
+                                self.collectionView!.pagingEnabled = false
+                                
+                            }
+                        } else {
+                             self.collectionView?.contentOffset = CGPointMake(self.initxOffset,0)
+                        }
+                        
+                }) as GTransLayout?
+            
             transitioningFlag = true
+            let nextLayout = toBeExpandedFlag ? tallLayout : shortLayout
+            
+
+            // set proper offset for touched cell
+
+            let moPoint = sender.locationInView(self.collectionView)
+
+            if let cells = self.collectionView?.visibleCells() {
+                for  cell in cells{
+                    if CGRectContainsPoint(cell.frame, moPoint){
+                        self.touchedCell = cell as? UICollectionViewCell
+                        self.initXCell = self.touchedCell!.frame.origin.x
+                        let indexPath = self.collectionView?.indexPathForCell(touchedCell!)
+                        self.tgtXCell = nextLayout.layoutAttributesForItemAtIndexPath(indexPath!).frame.origin.x
+                        break
+                    }
+                }
+            }
+            
+            
 
         case UIGestureRecognizerState.Changed:
             if !transitioningFlag {//if not transitoning, return
@@ -206,11 +291,29 @@ class GCollectionViewController: UICollectionViewController,UIGestureRecognizerD
             changedFlag = true  // set flag here
 
             self.removeAnimation()  //remove on-going animation here
-            
+
             //update position only when point.y is between initialPoint.y and targety
-            if (point.y - initialPanPoint.y) * (point.y - targetY) <= 0 {
+            if self.toBeExpandedFlag{
+                if point.y < initialPanPoint.y {
+                    point.y = initialPanPoint.y
+                }
+                else if point.y > targetY {
+                    point.y = targetY
+                }
+            }
+            else{
+                if point.y > initialPanPoint.y {
+                    point.y = initialPanPoint.y
+                }
+                else if point.y < targetY {
+                    point.y = targetY
+                }
+            }
+            if let tcell = self.touchedCell{
+                updateXOffset(point.x, progress: progress)
                 updateWithProgress(progress)
             }
+
         case UIGestureRecognizerState.Ended,UIGestureRecognizerState.Cancelled:
 
             if !changedFlag {//without this guard, collectionview behaves strangely
@@ -241,6 +344,7 @@ class GCollectionViewController: UICollectionViewController,UIGestureRecognizerD
                         yToReach = initialPanPoint.y
                     }
                     let durationToFinish = abs(yToReach - point.y) / yVelocity
+                    self.xWhenReleased = point.x    //record point.x to calculate contentOffset during final animation
                     self.finishInteractiveTransition(progress, duration: durationToFinish, success:success)
                 }
             }
@@ -252,6 +356,13 @@ class GCollectionViewController: UICollectionViewController,UIGestureRecognizerD
             break
         }
 
+    }
+    
+    //calculate proper contentOffset for CollectionView
+    //
+    func updateXOffset(xpos:CGFloat, progress:CGFloat){
+        let xorgForCell = (1-progress)*self.initXCell + progress * self.tgtXCell
+        self.xOffset = initxOffset + initialPanPoint.x - xpos  + (xorgForCell - self.initXCell)
     }
     
     func updatePositionData(point:CGPoint,progress:CGFloat){
@@ -266,11 +377,7 @@ class GCollectionViewController: UICollectionViewController,UIGestureRecognizerD
         targetY = tallHeight - hRatio * (toBeExpandedFlag ? tallLayout.itemSize.height:shortLayout.itemSize.height)
     }
     
-    func postInteractionFinished(){
-        if !self.asyncNodeFlag {
-            self.startGesture()
-        }
-    }
+
     
     func finishInteractiveTransition(progress:CGFloat,duration:CGFloat,success:Bool){
         
@@ -289,7 +396,8 @@ class GCollectionViewController: UICollectionViewController,UIGestureRecognizerD
                         }
                     }
                     prop.writeBlock = {obj, values in
-                        //println("value = \(values[0])")
+                        // contentOffset has to be animated accoringly
+                        self.updateXOffset(self.xWhenReleased, progress: values[0])
                         self.updateWithProgress(values[0])
                     }
                     prop.threshold = 0.1
@@ -315,6 +423,7 @@ class GCollectionViewController: UICollectionViewController,UIGestureRecognizerD
 
         if success {
             self.updateWithProgress(1.0)
+            //(self.collectionView! as GCollectionView).offsetAccept = false
             self.collectionView?.finishInteractiveTransition()
             transitioningFlag = false
             self.toBeExpandedFlag = !self.toBeExpandedFlag
@@ -340,7 +449,9 @@ class GCollectionViewController: UICollectionViewController,UIGestureRecognizerD
         //at any time. therefore, this guard is needed
         
         if let layout = getTransitionLayout(){
-            layout.transitionProgress = progress
+            //layout.transitionProgress = progress
+        
+            (layout as GTransLayout).setProgress(progress, xOffset: xOffset)
         }
     }
     
@@ -356,11 +467,12 @@ class GCollectionViewController: UICollectionViewController,UIGestureRecognizerD
         }
     }
     
-    //to enable user to interact both vertically and horizontally, may need to
-    //return yes here. but at this point, it just messes up.
+    //if true is returned, scrolling and zooming will be messed up
     
     func gestureRecognizer(gestureRecognizer: UIGestureRecognizer,
         shouldRecognizeSimultaneouslyWithGestureRecognizer otherGestureRecognizer: UIGestureRecognizer) -> Bool{
             return false
     }
+    
+
 }

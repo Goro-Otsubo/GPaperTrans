@@ -10,4 +10,4 @@
 #import "POPAnimatableProperty.h"
 #import "POPDecayAnimation.h"
 #import "POPBasicAnimation.h"
-#import <COSTouchVisualizerWindow.h>
+#import "POPSpringAnimation.h"
