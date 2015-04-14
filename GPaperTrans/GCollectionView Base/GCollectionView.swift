@@ -13,7 +13,17 @@ import UIKit
 
 class GCollectionView: UICollectionView{
     var offsetAccept:Bool
-    
+    var oldOffset:CGPoint = CGPointZero
+    override var contentOffset:CGPoint{
+        willSet{
+            oldOffset = contentOffset
+        }
+        didSet{
+            if !self.offsetAccept{
+                super.contentOffset = oldOffset
+            }
+        }
+    }
 
 
     required override init(frame:CGRect,collectionViewLayout:UICollectionViewLayout){
@@ -27,12 +37,12 @@ class GCollectionView: UICollectionView{
     }
 
     
-    func setContentOffset(contentOffset: CGPoint) {
-
-        if self.offsetAccept{
-            super.contentOffset = contentOffset
-        }
-    }
+//    func setContentOffset(contentOffset: CGPoint) {
+//
+//        if self.offsetAccept{
+//            super.contentOffset = contentOffset
+//        }
+//    }
     
     override func finishInteractiveTransition() {
 

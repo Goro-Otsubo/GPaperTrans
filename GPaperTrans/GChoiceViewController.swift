@@ -22,7 +22,7 @@ class GChoiceViewController: UIViewController {
         let width = CGRectGetWidth(self.view.frame)
         let height = CGRectGetHeight(self.view.frame)
         
-        let aSyncButton = UIButton.buttonWithType(UIButtonType.System) as UIButton
+        let aSyncButton = UIButton.buttonWithType(UIButtonType.System) as! UIButton
         aSyncButton.frame = CGRectMake(0,0,width,height/2)
         aSyncButton.setTitle("Responsive", forState: UIControlState.Normal)
         aSyncButton.backgroundColor = UIColor.greenColor()
@@ -31,7 +31,7 @@ class GChoiceViewController: UIViewController {
         
         self.view.addSubview(aSyncButton)
         
-        let syncButton = UIButton.buttonWithType(UIButtonType.System) as UIButton
+        let syncButton = UIButton.buttonWithType(UIButtonType.System) as! UIButton
         syncButton.frame = CGRectMake(0,height/2,width,height/2)
         syncButton.setTitle("Standard", forState: UIControlState.Normal)
         syncButton.backgroundColor = UIColor.yellowColor()

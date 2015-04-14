@@ -22,9 +22,9 @@ class GTransLayout: UICollectionViewTransitionLayout {
     
     func setProgress(progress:CGFloat, xOffset:CGFloat){
 
-        (self.collectionView! as GCollectionView).offsetAccept = false
+        (self.collectionView! as! GCollectionView).offsetAccept = false
         super.transitionProgress = progress     //contentOffset will be set to 0.0. therefore set "guard"
-        (self.collectionView! as GCollectionView).offsetAccept = true
+        (self.collectionView! as! GCollectionView).offsetAccept = true
         
         var prefOffset = self.collectionView!.contentOffset
         prefOffset.x = xOffset

@@ -31,7 +31,7 @@ class GCollectionViewController: UICollectionViewController,UIGestureRecognizerD
     var tgtXCell:CGFloat                        //frame.origin.x of cell when transaction will finish
     var xWhenReleased:CGFloat                   //x of touch point when user released the finger
     
-    override init(collectionViewLayout layout: UICollectionViewLayout!) {
+    override init(collectionViewLayout layout: UICollectionViewLayout) {
         
         self.asyncNodeFlag = true           //default value. will be set by 
                                             //GRootViewController in viewDidLoad
@@ -98,12 +98,12 @@ class GCollectionViewController: UICollectionViewController,UIGestureRecognizerD
     override func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
         
         if asyncNodeFlag{
-            let cell = collectionView.dequeueReusableCellWithReuseIdentifier(reuseIdentifier, forIndexPath: indexPath) as GCollectionViewCell
+            let cell = collectionView.dequeueReusableCellWithReuseIdentifier(reuseIdentifier, forIndexPath: indexPath) as! GCollectionViewCell
             cell.setIndex(indexPath.row, size: toBeExpandedFlag ? shortLayout.itemSize : tallLayout.itemSize)
             return cell
         }
         else{
-            let cell = collectionView.dequeueReusableCellWithReuseIdentifier(synReuseIdentifier, forIndexPath: indexPath) as GSyncViewCell
+            let cell = collectionView.dequeueReusableCellWithReuseIdentifier(synReuseIdentifier, forIndexPath: indexPath) as! GSyncViewCell
             cell.setIndex(indexPath.row, size:  toBeExpandedFlag ? shortLayout.itemSize : tallLayout.itemSize)
             return cell
         }
@@ -126,7 +126,7 @@ class GCollectionViewController: UICollectionViewController,UIGestureRecognizerD
         //completionBlock is executed when animation is removed.
         //therefore, make completionBlock nil before removal
         
-        let anim: POPBasicAnimation? = self.pop_animationForKey("animation") as POPBasicAnimation?
+        let anim: POPBasicAnimation? = self.pop_animationForKey("animation") as! POPBasicAnimation?
 
         if anim != nil{
             anim!.completionBlock = nil
@@ -139,7 +139,7 @@ class GCollectionViewController: UICollectionViewController,UIGestureRecognizerD
     func gestureRecognizerShouldBegin(gestureRecognizer: UIGestureRecognizer) -> Bool
     {
         if(gestureRecognizer === self.panRecog) {
-            let panRecog = gestureRecognizer as UIPanGestureRecognizer
+            let panRecog = gestureRecognizer as! UIPanGestureRecognizer
             let direction = panRecog.velocityInView(panRecog.view)
             let pos = panRecog.locationInView(panRecog.view)
             
@@ -232,7 +232,7 @@ class GCollectionViewController: UICollectionViewController,UIGestureRecognizerD
                             self.startGesture()
                         }
                         println("completion block called")
-                        (self.collectionView! as GCollectionView).offsetAccept = true
+                        (self.collectionView! as! GCollectionView).offsetAccept = true
 
                         
                         if finished {
@@ -242,7 +242,7 @@ class GCollectionViewController: UICollectionViewController,UIGestureRecognizerD
                                 let SpringAnimation = POPSpringAnimation()
                                 
                                 //animate scrolling to proper cell position
-                                SpringAnimation.property = POPAnimatableProperty.propertyWithName(kPOPScrollViewContentOffset) as POPAnimatableProperty
+                                SpringAnimation.property = POPAnimatableProperty.propertyWithName(kPOPScrollViewContentOffset) as! POPAnimatableProperty
                                 
                                 SpringAnimation.toValue = NSValue(CGPoint:CGPointMake(self.tgtXCell,0))
                                 SpringAnimation.springBounciness=5;
@@ -259,7 +259,7 @@ class GCollectionViewController: UICollectionViewController,UIGestureRecognizerD
                              self.collectionView?.contentOffset = CGPointMake(self.initxOffset,0)
                         }
                         
-                }) as GTransLayout?
+                }) as! GTransLayout?
             
             transitioningFlag = true
             let nextLayout = toBeExpandedFlag ? tallLayout : shortLayout
@@ -401,7 +401,7 @@ class GCollectionViewController: UICollectionViewController,UIGestureRecognizerD
                         self.updateWithProgress(values[0])
                     }
                     prop.threshold = 0.1
-                }) as POPAnimatableProperty
+                }) as! POPAnimatableProperty
                 
                 let anim = POPBasicAnimation()
                 anim.property = prop
@@ -451,7 +451,7 @@ class GCollectionViewController: UICollectionViewController,UIGestureRecognizerD
         if let layout = getTransitionLayout(){
             //layout.transitionProgress = progress
         
-            (layout as GTransLayout).setProgress(progress, xOffset: xOffset)
+            (layout as! GTransLayout).setProgress(progress, xOffset: xOffset)
         }
     }
     
